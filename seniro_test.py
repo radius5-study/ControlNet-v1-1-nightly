@@ -41,13 +41,6 @@ only_mid_control = False
 model_name = 'seniro'
 base_model = 'anything-v3-full.safetensors'
 base_model = 'ACertainThing.ckpt'
-# %%
-state_dict = load_state_dict(f'./models/{model_name}.pth', location='cpu')
-key = "control_model.input_hint_block.0.weight"
-state_dict[key] = torch.cat((state_dict[key], state_dict[key][:, 0:1, :, :]), dim=1)
-torch.save(state_dict, f'./models/{model_name}2.pth')
-# %%
-print(state_dict[key].shape)
 
 model = create_model(f'./models/{model_name}.yaml').cpu()
 model.load_state_dict(load_state_dict(f'./models/{base_model}', location='cpu'), strict=False)
@@ -58,12 +51,12 @@ model.only_mid_control = only_mid_control
 model.to(device="cuda")
 ddim_sampler = DDIMSampler(model)
 # %%
-# input_hint_blockを探す
-state_dict = load_state_dict(f'./models/{model_name}.pth', location='cpu')
-# %%
-for k, v in state_dict.items():
-    if 'hint' in k:
-        print(k)
+## input_hint_blockを探す
+#state_dict = load_state_dict(f'./models/{model_name}.pth', location='cpu')
+## %%
+#for k, v in state_dict.items():
+#    if 'hint' in k:
+#        print(k)
 # control_model.input_hint_block.0.weight 16, 3, 3, 3
 # control_model.input_hint_block.0.bias, 16
 # config["params"]["control_stage_config"]["params"]["hint_channels"]

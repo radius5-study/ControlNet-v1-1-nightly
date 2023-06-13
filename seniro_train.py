@@ -34,7 +34,8 @@ only_mid_control = False
 
 
 # First use cpu to load models. Pytorch Lightning will automatically move it to GPUs.
-model_name = 'control_v11p_sd15s2_lineart_anime'
+#model_name = 'control_v11p_sd15s2_lineart_anime'
+model_name = 'seniro'
 base_model = 'anything-v3-full.safetensors'
 base_model = 'ACertainThing.ckpt'
 model = create_model(f'./models/{model_name}.yaml').cpu()
