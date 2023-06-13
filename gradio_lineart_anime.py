@@ -31,6 +31,7 @@ ddim_sampler = DDIMSampler(model)
 
 
 def process(det, input_image, prompt, a_prompt, n_prompt, num_samples, image_resolution, detect_resolution, ddim_steps, strength, scale, seed, eta):
+    print(image_resolution)
     global preprocessor
 
     if det == 'Lineart_Anime':
@@ -70,6 +71,8 @@ def process(det, input_image, prompt, a_prompt, n_prompt, num_samples, image_res
             model.low_vram_shift(is_diffusing=True)
 
         model.control_scales = [strength] * 13
+        print(strength)
+        print(ddim_steps, num_samples, shape, cond, eta, scale, un_cond)
         samples, intermediates = ddim_sampler.sample(ddim_steps, num_samples,
                                                      shape, cond, verbose=False, eta=eta,
                                                      unconditional_guidance_scale=scale,
