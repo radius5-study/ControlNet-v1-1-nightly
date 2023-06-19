@@ -43,8 +43,10 @@ base_model = 'anything-v3-full.safetensors'
 base_model = 'ACertainThing.ckpt'
 
 model = create_model(f'./models/{model_name}.yaml').cpu()
-model.load_state_dict(load_state_dict(f'./models/{base_model}', location='cpu'), strict=False)
-model.load_state_dict(load_state_dict(f'./models/{model_name}.pth', location='cpu'), strict=False)
+#model.load_state_dict(load_state_dict(f'./models/{base_model}', location='cpu'), strict=False)
+#model.load_state_dict(load_state_dict(f'./models/{model_name}.pth', location='cpu'), strict=False)
+epoch=14
+model.load_state_dict(load_state_dict(f"output/seniro-epoch={epoch}.ckpt", location='cpu'), strict=False)
 model.learning_rate = learning_rate
 model.sd_locked = sd_locked
 model.only_mid_control = only_mid_control
@@ -63,27 +65,22 @@ ddim_sampler = DDIMSampler(model)
 # config["model"]["params"]["control_stage_config"]["params"]["hint_channels"]
 
 # %%
-filepath = "/mnt/c/Users/qzrp0/Downloads/0_0_lineart.jpg"
-input_image = np.array(Image.open(filepath).convert('RGB')).astype(np.uint8)
 
-image_resolution = 512
-img = resize_image(input_image, image_resolution)
-H, W, C = img.shape
-
-detected_map = input_image.copy()
-detected_map = cv2.resize(detected_map, (W, H), interpolation=cv2.INTER_LINEAR)
+dataset = MyDataset()
+# %%
+data = dataset[0]
+input_image = data["hint"]
 
 num_samples = 1
-control = 1.0 - torch.from_numpy(detected_map.copy()).float().cuda() / 255.0
+control = torch.from_numpy(input_image).float().cuda()
 control = torch.stack([control for _ in range(num_samples)], dim=0)
 control = einops.rearrange(control, 'b h w c -> b c h w').clone()
-control = torch.zeros([1, 4, 1024, 512], dtype=torch.float32, device="cuda")
-prompt = ""
+prompt = data["txt"]
 a_prompt = "masterpiece, best quality, ultra-detailed, illustration, disheveled hair"
 n_prompt = "longbody, lowres, bad anatomy, bad hands, missing fingers, pubic hair,extra digit, fewer digits, cropped, worst quality, low quality"
 strength = 1.0
 ddim_steps = 10 # 20
-shape = (4, 128, 64)
+shape = (4, 64, 64)
 eta = 1
 scale = 9
 cond = {"c_concat": [control], "c_crossattn": [model.get_learned_conditioning([prompt + ', ' + a_prompt] * num_samples)]}
@@ -102,3 +99,16 @@ results = [x_samples[i] for i in range(num_samples)]
 Image.fromarray(results[0])
 
 # RuntimeError: Given groups=1, weight of size [16, 3, 3, 3], expected input[1, 4, 1024, 512] to have 3 channels, but got 4 channels instead
+# %%
+
+from PIL import Image
+Image.fromarray((127.5*(input_image[:, :, 1:]+1)).astype(np.uint8))
+# %%
+
+Image.fromarray((255*(1-input_image[:, :, 0])).astype(np.uint8))
+
+# %%
+
+data = dataset[5]
+input_image = data["jpg"]
+Image.fromarray((127.5*(input_image[:, :, :]+1)).astype(np.uint8))

@@ -4,6 +4,7 @@ import numpy as np
 
 from torch.utils.data import Dataset
 from pathlib import Path
+import csv
 
 def bucket(_id: str) -> str:
     return _id[-3:].zfill(4)
@@ -11,17 +12,19 @@ def bucket(_id: str) -> str:
 class MyDataset(Dataset):
     def __init__(self):
         self.root = Path("/mnt/d")
+        self.csv_path = self.root/"filepath.csv"
         self.prompts = dict()
         self.stems = list()
-        for p in (self.root/"whitewaisttag").glob("**/*.txt"):
-            self.stems.append(p.stem)
-            with open(p, "rt") as f:
-                self.prompts[p.stem] = f.read()
-
-        self.data = []
-        with open('./training/fill50k/prompt.json', 'rt') as f:
-            for line in f:
-                self.data.append(json.loads(line))
+        with open(self.csv_path, "r") as f:
+            reader = csv.reader(f)
+            for path in reader:
+                p = Path(path[0]).stem
+                try:
+                    with (self.root/"whitewaist_tag"/bucket(p)/f"{p}.txt").open("rt") as f:
+                        self.prompts[p] = f.read()
+                    self.stems.append(p)
+                except Exception as e:
+                    print(e)
 
     def __len__(self):
         return len(self.stems)
