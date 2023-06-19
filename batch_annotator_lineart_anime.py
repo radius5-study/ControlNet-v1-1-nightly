@@ -44,7 +44,14 @@ def main(args: Namespace) -> None:
     for file_path in tqdm(file_paths):
         img = png_to_numpy(file_path)
         res = 512
-        out = lineart_anime(img, res)
+        if args.choice == "lineart_anime":
+            out = lineart_anime(img, res)
+        elif args.choice == "lineart":
+            out = lineart(img, res, coarse=False)
+        elif args.choice == "lineart_coarse":
+            out = lineart(img, res, coarse=True)
+        else:
+            raise NotImplementedError()
         out_path = Path(args.root)/args.savedir/f"{bucket(file_path.stem)}"/f"{file_path.stem}.png"
         out_path.parent.mkdir(parents=True, exist_ok=True)
         Image.fromarray(out[0]).save(out_path)
@@ -53,6 +60,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--csvpath", type=str, default="/mnt/d/filepath.csv")
     parser.add_argument("--root", type=str, default="/mnt/d")
-    parser.add_argument("--savedir", type=str, default="whitewaist_lineart_anime")
+    parser.add_argument("--savedir", type=str, default="")
+    parser.add_argument("--choice", type=str, default="lineart_anime", choices=["lineart_anime", "lineart", "lineart_coarse"])
     args = parser.parse_args()
+    if args.savedir == "":
+        args.savedir = f"whitewaist_{args.choice}"
     main(args)
