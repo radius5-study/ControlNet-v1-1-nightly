@@ -34,13 +34,10 @@ only_mid_control = False
 
 
 # First use cpu to load models. Pytorch Lightning will automatically move it to GPUs.
-#model_name = 'control_v11p_sd15s2_lineart_anime'
-model_name = 'seniro'
-base_model = 'anything-v3-full.safetensors'
 base_model = 'ACertainThing.ckpt'
-model = create_model(f'./models/{model_name}.yaml').cpu()
+model = create_model(f'models/control_v11p_sd15s2_lineart_anime.yaml').cpu()
 model.load_state_dict(load_state_dict(f'./models/{base_model}', location='cpu'), strict=False)
-model.load_state_dict(load_state_dict(f'./models/{model_name}.pth', location='cpu'), strict=False)
+model.load_state_dict(load_state_dict(f'./models/zero.pth', location='cpu'), strict=False)
 model.learning_rate = learning_rate
 model.sd_locked = sd_locked
 model.only_mid_control = only_mid_control
